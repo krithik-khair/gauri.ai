@@ -363,6 +363,12 @@ const permissionWarning = document.getElementById("permissionWarning");
 let KB = {};
 let listening = false;
 let recognition = null;
+// Ensure voices are fully loaded before selecting
+let voicesReady = false;
+
+speechSynthesis.onvoiceschanged = () => {
+  voicesReady = true;
+};
 
 /* ===== FIXED: EMBEDDED KNOWLEDGE BASE (NO FETCH NEEDED) ===== */
 const KNOWLEDGE_BASE = {
