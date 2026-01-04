@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gauri • Kritvya</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: radial-gradient(circle at bottom, #0b1a2b, #050505 60%);
+  color: #cfcfcf;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.header {
+  position: absolute;
+  top: 18px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.35em;
+  color: #6f86a6;
+}
+
+.app {
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+.orb-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 90px;
+}
+
+.orb {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5aa9ff, #1b3c66 70%);
+  box-shadow: 0 0 50px rgba(90,169,255,0.25);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.orb.listening {
+  animation: pulse 2.2s infinite;
+  box-shadow: 0 0 80px rgba(120,180,255,0.45);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.status {
+  margin-top: 55px;
+  font-size: 0.95rem;
+  color: #9aa8bd;
+  min-height: 40px;
+  padding: 0 16px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 24px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #5f6f85;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">GAURI • LIVE</div>
+
+<div class="app">
+  <div class="orb-wrapper">
+    <div id="orb" class="orb"></div>
+  </div>
+  <div id="status" class="status">
+    Silence is acceptable. Speak when ready.
+  </div>
+</div>
+
+<div class="footer">Kritvya • Discipline before comfort</div>
+
+<script>
+/* ================================
+   GAURI — FINAL VOICE CORE
+   ================================ */
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const orb = document.getElementById("orb");
+const statusEl = document.getElementById("status");
+
+let KB = {};
+let listening = false;
+let idleTimer = null;
+const IDLE_LIMIT = 10000;
+
+/* ===== LOAD JSON ===== */
+fetch("data.json")
+  .then(r => r.json())
+  .then(data => KB = data)
+  .catch(() => {
+    statusEl.textContent = "Failed to load knowledge base.";
+  });
+
+/* ===== VOICE SELECTION ===== */
+function bestVoice() {
+  const voices = speechSynthesis.getVoices();
+  return (
+    voices.find(v => v.lang === "en-US" && v.name.includes("Google")) ||
+    voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+    voices.find(v => v.lang.startsWith("en")) ||
+    voices[0]
+  );
+}
+
+/* ===== SPEAK ARRAY ===== */
+function speakLines(lines) {
+  speechSynthesis.cancel();
+  let i = 0;
+
+  function speakNext() {
+    if (i >= lines.length) {
+      resetIdle();
+      return;
+    }
+    const u = new SpeechSynthesisUtterance(lines[i]);
+    u.voice = bestVoice();
+    u.rate = 0.92;   // natural pace
+    u.pitch = 1.12; // warm feminine tone
+    u.onstart = () => statusEl.textContent = "Gauri is speaking.";
+    u.onend = () => {
+      i++;
+      setTimeout(speakNext, 450);
+    };
+    speechSynthesis.speak(u);
+  }
+  speakNext();
+}
+
+/* ===== INTENT KEYWORDS ===== */
+const INTENTS = {
+  identity: ["who are you", "your name", "introduce"],
+  kritvya: ["kritvya", "discipline", "philosophy"],
+  layers: ["layer", "cosmic", "strategic", "personal"],
+  guiding: ["guiding", "belief", "principle"],
+  satya1: ["satya 1", "sanyam"],
+  satya2: ["satya 2", "respect"],
+  satya3: ["satya 3", "help"],
+  satya4: ["satya 4", "kind"],
+  satya5: ["satya 5", "competition", "survival"],
+  satya6: ["satya 6", "knowledge"],
+  satya7: ["satya 7", "relations"],
+  compliment: ["good", "great", "amazing", "respect"],
+  goodbye: ["bye", "goodbye"]
+};
+
+/* ===== INTENT DETECTION ===== */
+function detectIntent(text) {
+  text = text.toLowerCase();
+  let best = "unknown", scoreMax = 0;
+
+  for (const i in INTENTS) {
+    let score = 0;
+    INTENTS[i].forEach(k => { if (text.includes(k)) score++; });
+    if (score > scoreMax) { scoreMax = score; best = i; }
+  }
+  return best;
+}
+
+/* ===== HANDLE INPUT ===== */
+function handleInput(text) {
+  const i = detectIntent(text);
+
+  if (i === "identity") speakLines(KB.identity);
+  else if (i === "kritvya") speakLines(KB.kritvya);
+  else if (i === "layers") speakLines([
+    ...KB.three_layers.cosmic,
+    ...KB.three_layers.strategic,
+    ...KB.three_layers.personal
+  ]);
+  else if (i === "guiding") speakLines([
+    ...KB.guiding_principles["1"],
+    ...KB.guiding_principles["2"]
+  ]);
+  else if (i.startsWith("satya")) speakLines(KB.satya[i.replace("satya","")].spoken);
+  else if (i === "compliment") speakLines(KB.responses.compliment);
+  else if (i === "goodbye") speakLines(KB.responses.goodbye);
+  else speakLines(KB.responses.unknown);
+}
+
+/* ===== SPEECH RECOGNITION ===== */
+const rec = new SpeechRecognition();
+rec.lang = "en-US";
+rec.interimResults = false;
+rec.continuous = false;
+
+rec.onresult = e => handleInput(e.results[0][0].transcript);
+rec.onend = () => { orb.classList.remove("listening"); listening = false; };
+
+function startListening() {
+  if (listening) return;
+  speechSynthesis.cancel();   // IMPORTANT FIX
+  listening = true;
+  orb.classList.add("listening");
+  statusEl.textContent = "Listening.";
+  try { rec.start(); } catch {}
+  resetIdle();
+}
+
+/* ===== IDLE ===== */
+function resetIdle() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => speakLines(KB.responses.goodbye), IDLE_LIMIT);
+}
+
+/* ===== EVENTS ===== */
+orb.addEventListener("click", startListening);
+
+/* ===== INTRO ===== */
+setTimeout(() => speakLines(KB.identity), 900);
+</script>
+
+</body>
+</html>
