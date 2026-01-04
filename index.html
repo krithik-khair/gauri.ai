@@ -664,11 +664,12 @@ function speakLines(lines) {
   window.speechSynthesis.cancel();
   
   // Create a single utterance from all lines
-  const fullText = lines.join(' ');
+  const fullText = lines.join('. ');
   const utterance = new SpeechSynthesisUtterance(fullText);
   
   // Get female voice
-  let voice = getFemaleVoice();
+  let voice = voicesReady ? 
+  getFemaleVoice() : null;
   
   // Wait for voices if needed
   if (!voice) {
@@ -687,8 +688,8 @@ function speakLines(lines) {
   
   function configureAndSpeak(utterance) {
     // FEMALE VOICE SETTINGS
-    utterance.rate = 0.92;    // Natural speaking pace
-    utterance.pitch = 1.15;   // Higher pitch for feminine voice (1.0 is normal, 2.0 is highest)
+    utterance.rate = 0.95;    // Natural speaking pace
+    utterance.pitch = 1.18;  // Higher pitch for feminine voice (1.0 is normal, 2.0 is highest)
     utterance.volume = 1.0;
     
     utterance.onstart = () => {
