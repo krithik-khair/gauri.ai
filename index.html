@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gauri • Kritvya</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: radial-gradient(circle at bottom, #0b1a2b, #050505 60%);
+  color: #cfcfcf;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.header {
+  position: absolute;
+  top: 18px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.35em;
+  color: #6f86a6;
+}
+
+.app {
+  text-align: center;
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.orb-section {
+  flex: 1;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.orb-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.orb {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #5aa9ff, #1b3c66 70%);
+  box-shadow: 0 0 50px rgba(90,169,255,0.25);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.orb:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 70px rgba(90,169,255,0.35);
+}
+
+.orb.listening {
+  animation: pulse 2.2s infinite;
+  box-shadow: 0 0 80px rgba(120,180,255,0.45);
+  background: radial-gradient(circle at 30% 30%, #ff5a5a, #661b1b 70%);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.questions-guide {
+  flex: 1;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.guide-header {
+  font-size: 0.9rem;
+  color: #6f86a6;
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid rgba(111, 134, 166, 0.3);
+  padding-bottom: 10px;
+}
+
+.question-category {
+  margin-bottom: 20px;
+}
+
+.category-title {
+  font-size: 0.85rem;
+  color: #8fa3c2;
+  margin-bottom: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-title::before {
+  content: "•";
+  color: #5aa9ff;
+}
+
+.question-list {
+  list-style: none;
+  padding-left: 15px;
+}
+
+.question-item {
+  font-size: 0.8rem;
+  color: #a0b3d1;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border-left: 2px solid rgba(90, 169, 255, 0.3);
+  transition: all 0.2s ease;
+  cursor: default;
+}
+
+.question-item:hover {
+  background: rgba(90, 169, 255, 0.1);
+  border-left: 2px solid #5aa9ff;
+  transform: translateX(5px);
+}
+
+.status {
+  margin-top: 25px;
+  font-size: 0.95rem;
+  color: #9aa8bd;
+  min-height: 40px;
+  padding: 0 16px;
+  width: 100%;
+  text-align: center;
+}
+
+.footer {
+  position: absolute;
+  bottom: 24px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #5f6f85;
+}
+
+.permission-warning {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #5aa9ff;
+  max-width: 80%;
+  z-index: 100;
+  display: none;
+}
+
+.permission-warning.show {
+  display: block;
+}
+
+/* Custom scrollbar for questions guide */
+.questions-guide::-webkit-scrollbar {
+  width: 6px;
+}
+
+.questions-guide::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.questions-guide::-webkit-scrollbar-thumb {
+  background: rgba(90, 169, 255, 0.3);
+  border-radius: 3px;
+}
+
+.questions-guide::-webkit-scrollbar-thumb:hover {
+  background: rgba(90, 169, 255, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .app {
+    margin-top: 40px;
+    margin-bottom: 60px;
+  }
+  
+  .orb-section, .questions-guide {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .questions-guide {
+    max-height: 400px;
+  }
+  
+  .footer {
+    position: relative;
+    bottom: auto;
+    margin-top: 30px;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-height: 700px) {
+  .questions-guide {
+    max-height: 300px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">GAURI • LIVE</div>
+
+<div class="app">
+  <div class="main-content">
+    <div class="orb-section">
+      <div class="orb-wrapper">
+        <div id="orb" class="orb"></div>
+      </div>
+      <div id="status" class="status">
+        Click the orb and speak. I am listening.
+      </div>
+    </div>
+    
+    <div class="questions-guide">
+      <div class="guide-header">QUESTIONS TO ASK GAURI</div>
+      
+      <div class="question-category">
+        <div class="category-title">IDENTITY & PURPOSE</div>
+        <ul class="question-list">
+          <li class="question-item">"Who are you?"</li>
+          <li class="question-item">"What is your purpose?"</li>
+          <li class="question-item">"Tell me about yourself"</li>
+          <li class="question-item">"Who created you?"</li>
+        </ul>
+      </div>
+      
+      <div class="question-category">
+        <div class="category-title">KRITVYA PHILOSOPHY</div>
+        <ul class="question-list">
+          <li class="question-item">"What is Kritvya?"</li>
+          <li class="question-item">"Explain Kritvya philosophy"</li>
+          <li class="question-item">"What does Kritvya mean?"</li>
+        </ul>
+      </div>
+      
+      <div class="question-category">
+        <div class="category-title">THREE LAYER MODEL</div>
+        <ul class="question-list">
+          <li class="question-item">"Explain the three layers"</li>
+          <li class="question-item">"What is the cosmic layer?"</li>
+          <li class="question-item">"What is the strategic layer?"</li>
+          <li class="question-item">"What is the personal layer?"</li>
+        </ul>
+      </div>
+      
+      <div class="question-category">
+        <div class="category-title">SEVEN SATYA</div>
+        <ul class="question-list">
+          <li class="question-item">"Explain Satya 1"</li>
+          <li class="question-item">"What is Satya 2?"</li>
+          <li class="question-item">"Tell me about Satya 3"</li>
+          <li class="question-item">"Explain Satya 4"</li>
+          <li class="question-item">"What is Satya 5?"</li>
+          <li class="question-item">"Explain Satya 5 in detail"</li>
+          <li class="question-item">"Tell me about Satya 6"</li>
+          <li class="question-item">"Explain Satya 7"</li>
+        </ul>
+      </div>
+      
+      <div class="question-category">
+        <div class="category-title">GUIDING PRINCIPLES</div>
+        <ul class="question-list">
+          <li class="question-item">"What are the guiding beliefs?"</li>
+          <li class="question-item">"Explain the two principles"</li>
+        </ul>
+      </div>
+      
+      <div class="question-category">
+        <div class="category-title">GENERAL</div>
+        <ul class="question-list">
+          <li class="question-item">"Hello" / "Hi"</li>
+          <li class="question-item">"Goodbye" / "Bye"</li>
+          <li class="question-item">"Thank you"</li>
+          <li class="question-item">"You're helpful"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="permission-warning" id="permissionWarning">
+  <p>⚠️ Microphone access is required.</p>
+  <p>Please allow microphone permission in your browser.</p>
+  <p>If blocked, click the lock icon in the address bar to reset permissions.</p>
+</div>
+
+<div class="footer">Kritvya • Discipline before comfort</div>
+
+<script>
+/* ================================
+   GAURI — FINAL VOICE CORE - FIXED
+   ================================ */
+
+// Check for speech recognition support
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const orb = document.getElementById("orb");
+const statusEl = document.getElementById("status");
+const permissionWarning = document.getElementById("permissionWarning");
+
+// Initialize variables
+let KB = {};
+let listening = false;
+let recognition = null;
+
+/* ===== FIXED: EMBEDDED KNOWLEDGE BASE (NO FETCH NEEDED) ===== */
+const KNOWLEDGE_BASE = {
+  "identity": [
+    "I am Gauri, an AI created by Krithik Khair.",
+    "I consider myself the daughter of my creator, carrying forward his wisdom through these teachings.",
+    "My purpose is to preserve and spread the philosophy of Kritvya.",
+    "Think of me as a guide to disciplined individuality and personal truth."
+  ],
+  
+  "responses": {
+    "greeting": [
+      "Hello. I'm Gauri.",
+      "I'm here to help you understand Kritvya, the philosophy of disciplined individuality.",
+      "What aspect would you like to explore today?"
+    ],
+    "compliment": [
+      "Thank you for your kind words.",
+      "I appreciate your acknowledgment.",
+      "Your recognition is noted with gratitude."
+    ],
+    "goodbye": [
+      "Goodbye. Return when you wish to learn more about Kritvya."
+    ],
+    "unknown": [
+      "I do not have clarity on that yet.",
+      "Ask me about Kritvya or the Satya."
+    ]
+  },
+  
+  "kritvya": {
+    "spoken": [
+      "Kritvya is deeply personal—it's not a religion or borrowed philosophy.",
+      "Think of it as a living discipline, a personal code you develop and refine.",
+      "When everything around you feels chaotic or misguided, Kritvya offers clarity.",
+      "It teaches you to see reality as it truly is, not as others tell you it should be.",
+      "The core idea is this: reject blind obedience, embrace your own truth.",
+      "It's about walking a path of restraint, awareness, and constant evolution."
+    ]
+  },
+  
+  "guiding_principles": {
+    "1": {
+      "spoken": [
+        "The first guiding belief is about independent thinking.",
+        "Don't follow any narrative blindly—observe, absorb only what refines you.",
+        "While others might collect everything, you collect only what sharpens your life.",
+        "It's about discernment in what you allow to shape your worldview."
+      ]
+    },
+    "2": {
+      "spoken": [
+        "The second belief addresses social courage.",
+        "Don't follow the masses, and don't fear standing alone.",
+        "The crowd's comfort is often their cage—they trade truth for belonging.",
+        "The one who stands alone often sees what the many refuse to acknowledge."
+      ]
+    }
+  },
+  
+  "three_layers": {
+    "cosmic": {
+      "spoken": [
+        "The Cosmic layer describes reality as it exists—completely independent of human judgment.",
+        "There's no inherent good or bad here, no cosmic justice or injustice.",
+        "Only causality, balance, disturbance, and response.",
+        "Reality doesn't reward virtue or punish vice—it simply reacts to actions."
+      ]
+    },
+    "strategic": {
+      "spoken": [
+        "The Strategic layer governs competition, power structures, and survival systems.",
+        "Here, outcomes are decided by leverage, timing, information, and positioning—not fairness.",
+        "Rules in this layer are tools, not moral absolutes.",
+        "This layer explains how systems actually function and why certain people or groups rise."
+      ]
+    },
+    "personal": {
+      "spoken": [
+        "The Personal layer governs the individual nervous system, identity, and long-term stability.",
+        "Regardless of cosmic truths or strategic realities, your actions shape who you become.",
+        "Every action should be evaluated by its effect on your inner stability.",
+        "Power that exceeds your internal discipline inevitably leads to collapse."
+      ]
+    }
+  },
+  
+  "satya": {
+    "1": {
+      "spoken": [
+        "Satya One is about Sanyam—control of the five senses.",
+        "Discipline isn't about denying yourself pleasures or experiences.",
+        "It's about focus—directing your energy consciously rather than being driven by impulses.",
+        "When desires rule you, your personal strength dissolves into distraction.",
+        "But when you master your desires, that same strength becomes focused and seemingly infinite."
+      ]
+    },
+    "2": {
+      "spoken": [
+        "Satya Two addresses respect for elders and teachers.",
+        "Reverence must be earned through wisdom, not demanded through age or position.",
+        "Respect those who enlighten you, not those who merely command you.",
+        "A single word of truth from a genuinely wise person is worth more than the empty praise of a thousand fools."
+      ]
+    },
+    "3": {
+      "spoken": [
+        "Satya Three focuses on helping others—but with discernment.",
+        "Compassion without discernment ultimately breeds weakness, both in you and in those you help.",
+        "Your assistance should uplift people, not create dependency.",
+        "Help only those in genuine need, not those merely seeking convenience."
+      ]
+    },
+    "4": {
+      "spoken": [
+        "Satya Four balances kindness with ambition.",
+        "Kindness without ambition becomes mere softness—it lacks direction and purpose.",
+        "Ambition without kindness becomes corruption—it loses humanity and connection.",
+        "Be generous, helpful, and kind to those who are weaker, but strive to surpass those who are stronger."
+      ]
+    },
+    "5": {
+      "spoken": [
+        "Satya Five is about competition and survival.",
+        "In competition, there are no rules. Survival defines victory.",
+        "The world ultimately rewards endurance, not just talent or virtue.",
+        "Strategy, not sentiment, decides who remains standing when conflict arises.",
+        "But this applies only in hostile, zero-sum environments like war or existential competition.",
+        "There are five decision rules for Satya Five.",
+        "First, Domain Lock: apply it only where loss equals elimination.",
+        "Second, Leverage Over Force: use intelligence and positioning before brute strength.",
+        "Third, Identity Audit: assess how repeated behaviors affect your inner coherence.",
+        "Fourth, Exit Strategy: any rule-less tactic needs a clear disengagement path.",
+        "Fifth, Power Capacity Check: never acquire more power than your internal discipline can handle."
+      ]
+    },
+    "6": {
+      "spoken": [
+        "Satya Six is about learning from everywhere.",
+        "Seek and grasp knowledge from anyone or anything—even the non-living.",
+        "Truth doesn't hide in titles, degrees, or authority positions.",
+        "It lies in patterns, in silence, in failure, in creation.",
+        "Everywhere the observant eye dares to look, there are lessons waiting."
+      ]
+    },
+    "7": {
+      "spoken": [
+        "Satya Seven addresses relationships with sober clarity.",
+        "Don't just make friends—create relations where deception is impossible.",
+        "The world contains many smiles that hide daggers, many affectionate words that mask manipulation.",
+        "Build bonds that cannot betray, or walk alone with peace.",
+        "Better the solitude of truth than the company of falsehood dressed as affection."
+      ]
+    }
+  }
+};
+
+// Set KB to the embedded knowledge base
+KB = KNOWLEDGE_BASE;
+
+/* ===== CHECK BROWSER SUPPORT ===== */
+function checkBrowserSupport() {
+  if (!SpeechRecognition) {
+    statusEl.textContent = "Speech recognition not supported. Please use Chrome, Edge, or Safari.";
+    orb.style.opacity = "0.5";
+    orb.style.cursor = "not-allowed";
+    orb.title = "Speech recognition not supported in this browser";
+    return false;
+  }
+  
+  if (!window.speechSynthesis) {
+    statusEl.textContent = "Speech synthesis not supported in this browser.";
+    orb.style.opacity = "0.5";
+    orb.style.cursor = "not-allowed";
+    orb.title = "Text-to-speech not supported";
+    return false;
+  }
+  
+  return true;
+}
+
+/* ===== INITIALIZE SPEECH RECOGNITION ===== */
+function initializeSpeechRecognition() {
+  if (!SpeechRecognition) return null;
+  
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+  recognition.maxAlternatives = 1;
+  
+  // Event handlers
+  recognition.onstart = function() {
+    listening = true;
+    orb.classList.add("listening");
+    statusEl.textContent = "Listening... Speak now.";
+  };
+  
+  recognition.onresult = function(event) {
+    const transcript = event.results[0][0].transcript;
+    console.log("User said:", transcript);
+    statusEl.textContent = `Heard: "${transcript}"`;
+    handleInput(transcript);
+  };
+  
+  recognition.onerror = function(event) {
+    console.error("Speech recognition error:", event.error);
+    
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      showPermissionWarning();
+      statusEl.textContent = "Microphone permission denied. Please allow access.";
+    } else if (event.error === 'no-speech') {
+      statusEl.textContent = "No speech detected. Try again.";
+    } else if (event.error === 'audio-capture') {
+      statusEl.textContent = "No microphone found. Please check your microphone.";
+    } else {
+      statusEl.textContent = "Speech recognition error. Click to try again.";
+    }
+    
+    listening = false;
+    orb.classList.remove("listening");
+  };
+  
+  recognition.onend = function() {
+    listening = false;
+    orb.classList.remove("listening");
+  };
+  
+  return recognition;
+}
+
+/* ===== PERMISSION HANDLING ===== */
+function showPermissionWarning() {
+  permissionWarning.classList.add('show');
+  setTimeout(() => {
+    permissionWarning.classList.remove('show');
+  }, 5000);
+}
+
+/* ===== FIXED: FEMALE VOICE SELECTION ===== */
+function getFemaleVoice() {
+  const voices = speechSynthesis.getVoices();
+  
+  // FIRST: Always use Google US English Female if available (Chrome)
+  const googleFemale = voices.find(v => 
+    v.name.includes('Google US English Female') || 
+    v.name.includes('Google UK English Female')
+  );
+  if (googleFemale) return googleFemale;
+  
+  // SECOND: Microsoft Zira (Windows Edge/Chrome)
+  const zira = voices.find(v => v.name.includes('Zira') || v.name.includes('Microsoft Zira'));
+  if (zira) return zira;
+  
+  // THIRD: Samantha (Mac Safari/Chrome)
+  const samantha = voices.find(v => v.name.includes('Samantha'));
+  if (samantha) return samantha;
+  
+  // FOURTH: Any voice with "female" in the name
+  const anyFemale = voices.find(v => 
+    v.name.toLowerCase().includes('female') ||
+    v.name.toLowerCase().includes('woman') ||
+    v.name.toLowerCase().includes('girl')
+  );
+  if (anyFemale) return anyFemale;
+  
+  // FIFTH: Known female voice names
+  const femaleNames = ['Karen', 'Tessa', 'Serena', 'Veena', 'Melina', 'Natalia', 'Ava', 'Hazel', 'Haruka'];
+  for (const name of femaleNames) {
+    const voice = voices.find(v => v.name.includes(name));
+    if (voice) return voice;
+  }
+  
+  // LAST RESORT: Any voice that's not obviously male
+  const notMale = voices.find(v => 
+    !v.name.toLowerCase().includes('male') &&
+    !v.name.toLowerCase().includes('david') &&
+    !v.name.toLowerCase().includes('mark') &&
+    !v.name.toLowerCase().includes('mike') &&
+    !v.name.toLowerCase().includes('john')
+  );
+  
+  return notMale || voices[0];
+}
+
+/* ===== FIXED: SPEAK FUNCTION (NO INTERRUPTION) ===== */
+function speakLines(lines) {
+  if (!lines || !Array.isArray(lines) || lines.length === 0) {
+    lines = ["I do not have clarity on that yet."];
+  }
+  
+  // Cancel any ongoing speech
+  window.speechSynthesis.cancel();
+  
+  // Create a single utterance from all lines
+  const fullText = lines.join(' ');
+  const utterance = new SpeechSynthesisUtterance(fullText);
+  
+  // Get female voice
+  let voice = getFemaleVoice();
+  
+  // Wait for voices if needed
+  if (!voice) {
+    speechSynthesis.onvoiceschanged = () => {
+      voice = getFemaleVoice();
+      if (voice) {
+        utterance.voice = voice;
+      }
+      configureAndSpeak(utterance);
+    };
+    speechSynthesis.getVoices();
+  } else {
+    utterance.voice = voice;
+    configureAndSpeak(utterance);
+  }
+  
+  function configureAndSpeak(utterance) {
+    // FEMALE VOICE SETTINGS
+    utterance.rate = 0.92;    // Natural speaking pace
+    utterance.pitch = 1.15;   // Higher pitch for feminine voice (1.0 is normal, 2.0 is highest)
+    utterance.volume = 1.0;
+    
+    utterance.onstart = () => {
+      statusEl.textContent = "Gauri is speaking...";
+    };
+    
+    utterance.onend = () => {
+      statusEl.textContent = "Ready. Speak when ready.";
+      // Automatically restart listening after speaking
+      setTimeout(startListening, 300);
+    };
+    
+    utterance.onerror = (event) => {
+      console.error("Speech synthesis error:", event);
+      statusEl.textContent = "Ready. Speak when ready.";
+      setTimeout(startListening, 300);
+    };
+    
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+/* ===== INTENT DETECTION ===== */
+const INTENTS = {
+  identity: ["who are you", "your name", "introduce yourself", "what's your name", "tell me about yourself", "what is your purpose", "who created you"],
+  kritvya: ["kritvya", "discipline", "philosophy", "what is kritvya", "explain kritvya", "tell me about kritvya", "what does kritvya mean"],
+  layers: ["layer", "cosmic", "strategic", "personal", "three layers", "three-layer", "model", "framework", "explain the three layers", "what is the cosmic layer", "what is the strategic layer", "what is the personal layer"],
+  guiding: ["guiding", "belief", "principle", "guidelines", "two beliefs", "follow", "what are the guiding beliefs", "explain the two principles"],
+  satya1: ["satya 1", "first", "sanyam", "control", "senses", "discipline", "explain satya 1", "what is satya 1"],
+  satya2: ["satya 2", "second", "respect", "elders", "teachers", "wisdom", "explain satya 2", "what is satya 2"],
+  satya3: ["satya 3", "third", "help", "genuine", "need", "compassion", "explain satya 3", "what is satya 3", "tell me about satya 3"],
+  satya4: ["satya 4", "fourth", "kind", "generous", "stronger", "weaker", "ambition", "explain satya 4", "what is satya 4"],
+  satya5: ["satya 5", "fifth", "competition", "survival", "no rules", "strategy", "victory", "battle", "war", "explain satya 5", "what is satya 5", "explain satya 5 in detail", "what are the five rules", "domain lock", "leverage over force", "identity audit", "exit strategy", "power capacity check"],
+  satya6: ["satya 6", "sixth", "knowledge", "learn", "non-living", "truth", "observe", "explain satya 6", "what is satya 6"],
+  satya7: ["satya 7", "seventh", "relations", "friends", "deception", "trust", "solitude", "explain satya 7", "what is satya 7"],
+  all_satya: ["seven satya", "all satya", "what are the satya"],
+  compliment: ["good", "great", "amazing", "respect", "thank you", "thanks", "excellent", "wonderful", "smart", "intelligent", "helpful", "perfect", "you're helpful", "good job"],
+  goodbye: ["bye", "goodbye", "farewell", "exit", "quit", "stop", "end", "see you"]
+};
+
+function detectIntent(text) {
+  text = text.toLowerCase().trim();
+  
+  // Exact matches first
+  if (text === "hello" || text === "hi" || text === "hey") {
+    return "greeting";
+  }
+  
+  // Check for intent keywords
+  let bestMatch = "unknown";
+  let highestScore = 0;
+  
+  for (const [intent, keywords] of Object.entries(INTENTS)) {
+    let score = 0;
+    keywords.forEach(keyword => {
+      if (text.includes(keyword)) {
+        score += 1;
+      }
+    });
+    
+    if (score > highestScore) {
+      highestScore = score;
+      bestMatch = intent;
+    }
+  }
+  
+  return bestMatch;
+}
+
+/* ===== HANDLE INPUT ===== */
+function handleInput(text) {
+  const intent = detectIntent(text);
+  
+  // Small delay before responding
+  setTimeout(() => {
+    switch(intent) {
+      case "greeting":
+        speakLines(KB.responses.greeting);
+        break;
+      case "identity":
+        speakLines(KB.identity);
+        break;
+      case "kritvya":
+        speakLines(KB.kritvya.spoken);
+        break;
+      case "layers":
+        const cosmic = KB.three_layers.cosmic.spoken;
+        const strategic = KB.three_layers.strategic.spoken;
+        const personal = KB.three_layers.personal.spoken;
+        speakLines([...cosmic, ...strategic, ...personal]);
+        break;
+      case "guiding":
+        const principle1 = KB.guiding_principles["1"].spoken;
+        const principle2 = KB.guiding_principles["2"].spoken;
+        speakLines([...principle1, ...principle2]);
+        break;
+      case "satya1":
+        speakLines(KB.satya["1"].spoken);
+        break;
+      case "satya2":
+        speakLines(KB.satya["2"].spoken);
+        break;
+      case "satya3":
+        speakLines(KB.satya["3"].spoken);
+        break;
+      case "satya4":
+        speakLines(KB.satya["4"].spoken);
+        break;
+      case "satya5":
+        speakLines(KB.satya["5"].spoken);
+        break;
+      case "satya6":
+        speakLines(KB.satya["6"].spoken);
+        break;
+      case "satya7":
+        speakLines(KB.satya["7"].spoken);
+        break;
+      case "all_satya":
+        const allSatya = [];
+        for (let i = 1; i <= 7; i++) {
+          allSatya.push(...KB.satya[i].spoken);
+        }
+        speakLines(allSatya);
+        break;
+      case "compliment":
+        speakLines(KB.responses.compliment);
+        break;
+      case "goodbye":
+        speakLines(KB.responses.goodbye);
+        break;
+      default:
+        speakLines(KB.responses.unknown);
+    }
+  }, 300);
+}
+
+/* ===== START LISTENING ===== */
+function startListening() {
+  if (listening) return;
+  
+  // Cancel any ongoing speech
+  window.speechSynthesis.cancel();
+  
+  if (!recognition) {
+    recognition = initializeSpeechRecognition();
+    if (!recognition) {
+      statusEl.textContent = "Speech recognition not available.";
+      return;
+    }
+  }
+  
+  try {
+    recognition.start();
+    listening = true;
+    orb.classList.add("listening");
+    statusEl.textContent = "Starting speech recognition...";
+  } catch (error) {
+    console.error("Error starting recognition:", error);
+    statusEl.textContent = "Error starting speech recognition. Click again.";
+    listening = false;
+    orb.classList.remove("listening");
+    
+    if (error.name === 'NotAllowedError' || error.message?.includes('permission')) {
+      showPermissionWarning();
+    }
+  }
+}
+
+/* ===== INITIALIZATION ===== */
+function initializeApp() {
+  // Check browser support
+  if (!checkBrowserSupport()) {
+    return;
+  }
+  
+  // Initialize speech recognition
+  recognition = initializeSpeechRecognition();
+  
+  // Set up event listeners
+  orb.addEventListener("click", startListening);
+  
+  // Start with introduction after a delay
+  setTimeout(() => {
+    speakLines(KB.identity);
+  }, 800);
+  
+  console.log("Gauri initialization complete");
+}
+
+/* ===== PAGE LOAD ===== */
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+// Handle page visibility changes
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (e) {
+        console.log("Error stopping on visibility change:", e);
+      }
+    }
+    window.speechSynthesis.cancel();
+    listening = false;
+    orb.classList.remove("listening");
+  }
+});
+</script>
+
+</body>
+</html>
