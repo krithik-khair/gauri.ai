@@ -663,9 +663,15 @@ function speakLines(lines) {
   // Cancel any ongoing speech
   window.speechSynthesis.cancel();
   
-  // Create a single utterance from all lines
-  const fullText = lines.join('. ');
-  const utterance = new SpeechSynthesisUtterance(fullText);
+// Create a single utterance from all lines
+const fullText = lines.join('. ');
+const utterance = new SpeechSynthesisUtterance(fullText);
+
+// Select feminine voice
+const voice = getFemaleVoice();
+if (voice) {
+  utterance.voice = voice;
+}
   
   // Get female voice
   function getFemaleVoice() {
