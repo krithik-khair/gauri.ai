@@ -668,22 +668,27 @@ function speakLines(lines) {
   const utterance = new SpeechSynthesisUtterance(fullText);
   
   // Get female voice
-  let voice = voicesReady ? 
-  getFemaleVoice() : null;
-  
-  // Wait for voices if needed
-  if (!voice) {
-    speechSynthesis.onvoiceschanged = () => {
-      voice = getFemaleVoice();
-      if (voice) {
-        utterance.voice = voice;
-      }
-      configureAndSpeak(utterance);
-    };
-    speechSynthesis.getVoices();
-  } else {
-    utterance.voice = voice;
-    configureAndSpeak(utterance);
+  function getFemaleVoice() {
+  const voices = speechSynthesis.getVoices();
+
+  if (!voices || voices.length === 0) {
+    return null;
+  }
+
+  // STRONG preference order (feminine voices only)
+  return (
+    voices.find(v => v.name === "Google US English Female") ||
+    voices.find(v => v.name === "Google UK English Female") ||
+    voices.find(v => v.name.includes("Samantha")) || // macOS
+    voices.find(v => v.name.includes("Zira")) ||     // Windows
+    voices.find(v => v.name.includes("Karen")) ||
+    voices.find(v => v.name.includes("Tessa")) ||
+    voices.find(v =>
+      v.lang.startsWith("en") &&
+      !v.name.toLowerCase().includes("male")
+    ) ||
+    null
+  );
   }
   
   function configureAndSpeak(utterance) {
