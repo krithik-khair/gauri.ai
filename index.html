@@ -659,6 +659,44 @@ function speakLines(lines) {
   if (!lines || !Array.isArray(lines) || lines.length === 0) {
     lines = ["I do not have clarity on that yet."];
   }
+
+  const text = lines.join(". ");
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  // 🔒 HARD-LOCK VOICE (NO DYNAMIC LOGIC)
+  const voices = speechSynthesis.getVoices();
+
+  // Strong feminine preference
+  const femaleVoice =
+    voices.find(v => v.name.includes("Google") && v.name.includes("Female")) ||
+    voices.find(v => v.name.includes("Samantha")) ||
+    voices.find(v => v.name.includes("Zira")) ||
+    voices.find(v => !v.name.toLowerCase().includes("male"));
+
+  if (femaleVoice) {
+    utterance.voice = femaleVoice;
+  }
+
+  // 🎧 VOICE TUNING (STABLE)
+  utterance.rate = 0.95;
+  utterance.pitch = 1.12;
+  utterance.volume = 1;
+
+  utterance.onstart = () => {
+    statusEl.textContent = "Gauri is speaking...";
+  };
+
+  utterance.onend = () => {
+    statusEl.textContent = "Tap the orb and speak.";
+  };
+
+  utterance.onerror = (e) => {
+    console.error("TTS error", e);
+    statusEl.textContent = "Voice error. Tap again.";
+  };
+
+  speechSynthesis.speak(utterance);
+}
   
   // Cancel any ongoing speech
   window.speechSynthesis.cancel();
